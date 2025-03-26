@@ -71,7 +71,7 @@ def make_box_plots(sample_df):
     
     response_freqs = []
     no_response_freqs = []
-    with open("significance_tests.txt", 'w') as outf:
+    with open("data/significance_tests.txt", 'w') as outf:
         for p in populations:
             # responders boxplot
             response = sample_df[(sample_df.loc[:, "population"] == p) & (sample_df.loc[:, "response"] == "y")]
