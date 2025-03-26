@@ -128,15 +128,18 @@ def main():
         sys.exit()
         
     # call function to create relative freqeuncy .csv output
+    print("Calculating relative frequencies...")
     sample_df = relative_frequency(cc_df)
     del cc_df
     
     # Make boxplots showing the population relative frequencies comparing responders vs. non-responders.
     # Run some statistics to see hich cell populations are significantly different in relative frequencies
     # between responders and non-responders.
+    print("Creating boxplots and performing statistical analysis...")
     make_box_plots(sample_df)
 
 
 if __name__ == "__main__":
     main()
+    print("Finished! See data directory for output.")
     
