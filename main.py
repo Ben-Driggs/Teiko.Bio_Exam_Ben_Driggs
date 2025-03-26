@@ -6,10 +6,11 @@ from textwrap import fill
 from scipy.stats import mannwhitneyu
 
 
-def relative_frequency(cc_df):
+def relative_frequency(output_path, cc_df):
     """
     Converts cell count in cell-count.csv to relative frequency (in percentage) of total cell count for each sample.
     Output saved as 'sample_cell_data.csv'.
+    :param output_path: chosen by user, directs where any output files/directories will be stored
     :param cc_df: A pandas dataframe that contains the sample and cell count information from 'cell-count.csv'.
     :return: A pandas dataframe containing sample, total cell count, treatment response, treatment, population, cell count, and relative frequency information.
     """
@@ -41,17 +42,19 @@ def relative_frequency(cc_df):
     sample_df['percentage'] = round(sample_df['count'] / sample_df['total_count'] * 100, 2)
     
     # output sample_df into a .csv file
-    outf = "data\\sample_cell_data.csv"
+    print(output_path + "\\data\\sample_cell_data.csv")
+    outf = output_path + "\\data\\sample_cell_data.csv"
     sample_df.to_csv(outf, sep=',', index=False)
     
     del cc_df
     return sample_df
     
     
-def make_box_plots(sample_df):
+def make_box_plots(output_path, sample_df):
     """
     Function will receive sample_df and create boxplots comparing the relative frequencies between responders and
     non-responders of tr1 for each population.
+    :param output_path: chosen by user, directs where any output files/directories will be stored
     :param sample_df: sample_df containing sample, population, treatment, response, and relative frequency information for all treatments.
     """
     
@@ -73,7 +76,7 @@ def make_box_plots(sample_df):
     
     response_freqs = []
     no_response_freqs = []
-    with open("data/significance_tests.txt", 'w') as outf:
+    with open(output_path + "\\data\\significance_tests.txt", 'w') as outf:
         for p in populations:
             # responders boxplot
             response = sample_df[(sample_df.loc[:, "population"] == p) & (sample_df.loc[:, "response"] == "y")]
@@ -99,7 +102,7 @@ def make_box_plots(sample_df):
         
     # remove blank plot and save figure
     axes[-1].axis('off')
-    plt.savefig("data\\Relative_Frequency_Comparisons.png")
+    plt.savefig(output_path + "\\data\\Relative_Frequency_Comparisons.png")
     
 
 def main():
@@ -109,14 +112,8 @@ def main():
     frequency boxplots, comparisons, and statistics.
     """
     
-    # save cell-count input file
-    if len(sys.argv) != 2:
-        # check for correct number of system arguments and quit if too few or too many are found.
-        cc_file = input("Expected one file name as a system argument, but none was provided.")
-        sys.exit()
-    else:
-        # save file path
-        cc_file = sys.argv[1]
+    cc_file = input("Enter name of cell count .csv file: \n")
+    output_directory = input("Enter desired output folder path. Don't include // at the end: \n")
     
     # read file into a dataframe
     try:
@@ -124,22 +121,27 @@ def main():
     except FileNotFoundError:
         # Provide information about error and quit program
         print(f"Could not find the provided file: {cc_file}")
-        print("Please check file path and try again.")
+        input("Please check file path and try again.")
         sys.exit()
         
-    # call function to create relative freqeuncy .csv output
-    print("Calculating relative frequencies...")
-    sample_df = relative_frequency(cc_df)
-    del cc_df
-    
-    # Make boxplots showing the population relative frequencies comparing responders vs. non-responders.
-    # Run some statistics to see hich cell populations are significantly different in relative frequencies
-    # between responders and non-responders.
-    print("Creating boxplots and performing statistical analysis...")
-    make_box_plots(sample_df)
+    try:
+        # call function to create relative freqeuncy .csv output
+        print("Calculating relative frequencies...")
+        sample_df = relative_frequency(output_directory, cc_df)
+        del cc_df
+        
+        # Make boxplots showing the population relative frequencies comparing responders vs. non-responders.
+        # Run some statistics to see hich cell populations are significantly different in relative frequencies
+        # between responders and non-responders.
+        print("Creating boxplots and performing statistical analysis...")
+        make_box_plots(output_directory, sample_df)
+    except BaseException:
+        input("Unknown error occured.")
+        sys.exit()
 
 
 if __name__ == "__main__":
     main()
-    print("Finished! See data directory for output.")
+    print("Finished!")
+    input("A data folder was created in your output directory. See contents for output files.")
     
