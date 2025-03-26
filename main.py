@@ -121,7 +121,7 @@ def main():
     # read file into a dataframe
     try:
         cc_df = pd.read_csv(cc_file)
-    except FileNotFoundError as e:
+    except FileNotFoundError:
         # Provide information about error and quit program
         print(f"Could not find the provided file: {cc_file}")
         print("Please check file path and try again.")
