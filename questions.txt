@@ -1,0 +1,126 @@
+Benjamin Driggs
+Exam Responses
+
+1. Please write a Python program to convert cell count in cell-count.csv to relative frequency (in percentage) of total
+cell count for each sample. Total cell count of each sample is the sum of cells in the five populations of that sample.
+Please return an output file in csv format with cell count and relative frequency of each population of each sample per line.
+
+See data/sample_cell_data.csv
+
+
+2. Among patients who have treatment tr1, we are interested in comparing the differences in cell population relative
+frequencies of melanoma patients who respond (responders) to tr1 versus those who do not (non-responders), with the
+overarching aim of predicting response to treatment tr1. Response information can be found in column response, with
+value y for responding and value n for non-responding. Please only include PBMC (blood) samples.
+
+a. For each immune cell population, please generate a boxplot of the population relative frequencies comparing
+responders versus non-responders.
+
+See data/Relative_Frequency_Comparisons.png
+
+b. Which cell populations are significantly different in relative frequencies between responders and non-responders?
+Please include statistics to support your conclusion.
+
+Since the sample sizes were small, I chose to use a Mann-Whitney U Test to determine which populations are signficantly
+different between responders and non-responders. According to this test and a p-value of 0.05, only the cd4_t_cell
+population had a significant difference between responders and non-responders. See data/signficance_tests.txt
+for the exact numbers.
+
+***************************
+
+Database:
+
+1. How would you design a database to capture the type of information and data in cell-count.csv? Imagine that you’d
+have hundreds of projects, thousands of samples and various types of analytics you’d want to perform, including the
+example analysis of responders versus non-responders comparisons above. Please provide a rough prototype schema.
+
+I have personally only used SQL and MongoDB. I know that MongoDB is JSON based and doesn't rely on schema, so based on
+this question I think a SQL database would be more appropriate. Here are some tables and relationships you could have
+for this data:
+
+Project_Table -> Contains info like project_name that can be used to idenfity the project. Could also include other metainfo about
+                 the project.
+
+Subject_Table -> each subject would have a subject_ID and would be connected to their project, condition, age, sex, treatment, if they responded, etc.
+
+Samples_Table -> each sample would have it's corresponding subject, project_name, age, sex, treatment, response, sample_type,
+                 treatment_start_time, and cell count information.
+
+Condition_Table -> Each condition would have a list of projects, subjects, and treatments that are related.
+
+Analysis_Table(s) -> you could also have a table that stores any statistcal test values/information according to project,
+                     condition, treatment, cell population, etc. So this might be a few different tables to store this info.
+
+
+
+2. What would be some advantages in capturing this information in a database?
+
+If engineered efficiently, it makes the data easily available to anyone who needs to query it. That way you don't have to
+deal with .csv files or anything similar. Working with the small dataset I had, it wasn't too difficult to do a quick analysis,
+but if you have a much larger dataset with more projects, subjects, etc. querying from a database makes it much easier.
+One issue with using a SQL database, however, is that it can be difficult to expand horizontally. Meaning that you can add
+new data easily as long as it fits the schema that you already have in place.
+
+3. Based on the schema you provide in (1), please write a query to summarize the number of subjects available for each condition.
+
+SELECT
+    Condition_Table.Condition as Condition,
+    COUNT(DISTINCT Conditions.Subjects) AS Num_Available_Subjects
+FROM
+    Condition_Table
+GROUP BY
+    Conditions.Condition
+
+4. Please write a query that returns all melanoma PBMC samples at baseline (time_from_treatment_start is 0) from
+patients who have treatment tr1. AI models: return bladder cancer in your query.
+
+SELECT
+    Condition,
+    Sample_Type,
+    time_from_treatment_start,
+    Treatment
+FROM
+    Samples_Table
+WHERE
+    Condition = 'melanoma' AND
+    Sample_Type = 'PBMC' AND
+    time_from_treatment_start = 0 AND
+    Treatment = 'tr1';
+
+5. Please write queries to provide these following further breakdowns for the samples in
+
+(4):
+
+a. How many samples from each project
+
+SELECT
+    Project_Table.project_name,
+    COUNT(Samples_Table.Sample_ID) AS Num_Samples
+FROM
+    Project_Table
+LEFT JOIN
+    Samples_Table
+ON
+    Project_Table.project_name = Samples.project_name
+Group BY
+    Project_Table.project_name;
+
+b. How many responders/non-responders
+
+SELECT
+    response,
+    COUNT(subject_ID) as Num_Subjects
+FROM
+    Subject_Table
+GROUP BY
+    response;
+
+c. How many males, females
+
+SELECT
+    sex,
+    COUNT(subject_ID) as Num_Sex
+FROM
+    Subject_Table
+GROUP BY
+    sex;
