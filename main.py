@@ -99,8 +99,6 @@ def make_box_plots(sample_df):
     axes[-1].axis('off')
     plt.savefig("Relative_Frequency_Comparisons.png")
     
-    return sample_df
-    
 
 def main():
     """
@@ -133,7 +131,7 @@ def main():
     # Make boxplots showing the population relative frequencies comparing responders vs. non-responders.
     # Run some statistics to see hich cell populations are significantly different in relative frequencies
     # between responders and non-responders.
-    sample_df = make_box_plots(sample_df)
+    make_box_plots(sample_df)
 
 
 if __name__ == "__main__":
