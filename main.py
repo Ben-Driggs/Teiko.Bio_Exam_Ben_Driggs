@@ -42,8 +42,8 @@ def relative_frequency(output_path, cc_df):
     sample_df['percentage'] = round(sample_df['count'] / sample_df['total_count'] * 100, 2)
     
     # output sample_df into a .csv file
-    print(output_path + "\\data\\sample_cell_data.csv")
-    outf = output_path + "\\data\\sample_cell_data.csv"
+    # print(output_path + "\\data\\sample_cell_data.csv")
+    outf = output_path + "\\sample_cell_data.csv"
     sample_df.to_csv(outf, sep=',', index=False)
     
     del cc_df
@@ -76,7 +76,7 @@ def make_box_plots(output_path, sample_df):
     
     response_freqs = []
     no_response_freqs = []
-    with open(output_path + "\\data\\significance_tests.txt", 'w') as outf:
+    with open(output_path + "\\significance_tests.txt", 'w') as outf:
         for p in populations:
             # responders boxplot
             response = sample_df[(sample_df.loc[:, "population"] == p) & (sample_df.loc[:, "response"] == "y")]
@@ -102,17 +102,18 @@ def make_box_plots(output_path, sample_df):
         
     # remove blank plot and save figure
     axes[-1].axis('off')
-    plt.savefig(output_path + "\\data\\Relative_Frequency_Comparisons.png")
+    plt.savefig(output_path + "\\Relative_Frequency_Comparisons.png")
     
 
 def main():
     """
     This main method will first attempt to retrieve the cell-count.csv file and stop the program if system arguments are not
-    appropriately formated. The relative frequency cell count .csv file wiil then be created, followed by the relative
+    appropriately formated. The relative frequency cell count .csv file wiil
+    then be created, followed by the relative
     frequency boxplots, comparisons, and statistics.
     """
     
-    cc_file = input("Enter name of cell count .csv file: \n")
+    cc_file = "cell-count.csv"
     output_directory = input("Enter desired output folder path. Don't include // at the end: \n")
     
     # read file into a dataframe
@@ -135,8 +136,8 @@ def main():
         # between responders and non-responders.
         print("Creating boxplots and performing statistical analysis...")
         make_box_plots(output_directory, sample_df)
-    except BaseException:
-        input("Unknown error occured.")
+    except BaseException as e:
+        input(f"The following error occured: \n{e}")
         sys.exit()
 
 
