@@ -25,11 +25,10 @@ def relative_frequency(cc_df):
     sample_df['sample'] = [sample for sample in list(cc_df.loc[:, 'sample']) for _ in range(5)]
     sample_df['total_count'] = [count for count in list(cc_df.loc[:, 'total_count']) for _ in range(5)]
     
-    # add response column for boxplots
-    sample_df['response'] = [r for r in list(cc_df.loc[:, 'response']) for _ in range(5)]
-    
-    # add treatment column for boxplots
-    sample_df['treatment'] = [t for t in list(cc_df.loc[:, 'treatment']) for _ in range(5)]
+    # add these columns for analysis
+    columns = ['condition', 'treatment', 'response', 'sample_type']
+    for c in columns:
+        sample_df[c] = [r for r in list(cc_df.loc[:, c]) for _ in range(5)]
     
     # add populution column to output df
     sample_df['population'] = [pop for _ in range(len(cc_df['sample'])) for pop in populations]
@@ -42,7 +41,7 @@ def relative_frequency(cc_df):
     sample_df['percentage'] = round(sample_df['count'] / sample_df['total_count'] * 100, 2)
     
     # output sample_df into a .csv file
-    outf = "sample_cell_data.csv"
+    outf = "data\\sample_cell_data.csv"
     sample_df.to_csv(outf, sep=',', index=False)
     
     del cc_df
@@ -66,9 +65,11 @@ def make_box_plots(sample_df):
     fig.suptitle(title, fontsize=14)
     
     # for each population, we want to make two boxplots, one for responders and one for non-responders.
-    # We won't include any data with samples that have nan for the response or didn't receive treatment 1
+    # Only include melanoma, with tr1 and PBMC blood samples.
     
     sample_df = sample_df[sample_df.loc[:, 'treatment'] == 'tr1']
+    sample_df = sample_df[sample_df.loc[:, 'condition'] == "melanoma"]
+    sample_df = sample_df[sample_df.loc[:, 'sample_type'] == "PBMC"]
     
     response_freqs = []
     no_response_freqs = []
@@ -98,7 +99,7 @@ def make_box_plots(sample_df):
         
     # remove blank plot and save figure
     axes[-1].axis('off')
-    plt.savefig("Relative_Frequency_Comparisons.png")
+    plt.savefig("data\\Relative_Frequency_Comparisons.png")
     
 
 def main():

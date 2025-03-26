@@ -1,20 +1,20 @@
 Population: b_cell
-Mann-Whitney U Test Score: 13.0
-P-value: 0.78323
+Mann-Whitney U Test Score: 12.0
+P-value: 0.51508
 
 Population: cd8_t_cell
-Mann-Whitney U Test Score: 18.0
-P-value: 0.62956
+Mann-Whitney U Test Score: 8.5
+P-value: 1.0
 
 Population: cd4_t_cell
-Mann-Whitney U Test Score: 29.5
-P-value: 0.01024
+Mann-Whitney U Test Score: 17.5
+P-value: 0.03806
 
 Population: nk_cell
-Mann-Whitney U Test Score: 24.0
-P-value: 0.11561
+Mann-Whitney U Test Score: 14.0
+P-value: 0.2373
 
 Population: monocyte
 Mann-Whitney U Test Score: 1.0
-P-value: 0.0135
+P-value: 0.05182
 
