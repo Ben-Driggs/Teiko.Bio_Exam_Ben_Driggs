@@ -10,7 +10,8 @@ def relative_frequency(cc_df):
     """
     Converts cell count in cell-count.csv to relative frequency (in percentage) of total cell count for each sample.
     Output saved as 'sample_cell_data.csv'.
-    :param cc_df: A pandas dataframe that contatins the sample and cell count information from 'cell-count.csv'.
+    :param cc_df: A pandas dataframe that contains the sample and cell count information from 'cell-count.csv'.
+    :return: A pandas dataframe containing sample, total cell count, treatment response, treatment, population, cell count, and relative frequency information.
     """
     
     # calculate total cell counts for each sample
@@ -44,7 +45,8 @@ def relative_frequency(cc_df):
     outf = "sample_cell_data.csv"
     sample_df.to_csv(outf, sep=',', index=False)
     
-    return cc_df, sample_df
+    del cc_df
+    return sample_df
     
     
 def make_box_plots(sample_df):
@@ -52,7 +54,6 @@ def make_box_plots(sample_df):
     Function will receive sample_df and create boxplots comparing the relative frequencies between responders and
     non-responders of tr1 for each population.
     :param sample_df: sample_df containing sample, population, treatment, response, and relative frequency information for all treatments.
-    :return: sample_df containing sample, population, treatment, response, and relative frequency information for tr1.
     """
     
     populations = ['b_cell', 'cd8_t_cell', 'cd4_t_cell', 'nk_cell', 'monocyte']
@@ -126,7 +127,8 @@ def main():
         sys.exit()
         
     # call function to create relative freqeuncy .csv output
-    cc_df, sample_df = relative_frequency(cc_df)
+    sample_df = relative_frequency(cc_df)
+    del cc_df
     
     # Make boxplots showing the population relative frequencies comparing responders vs. non-responders.
     # Run some statistics to see hich cell populations are significantly different in relative frequencies
