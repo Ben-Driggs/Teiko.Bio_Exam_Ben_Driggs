@@ -1,7 +1,9 @@
 import sys
-print(sys.executable)
+
 import pandas as pd
 import matplotlib.pyplot as plt
+from textwrap import fill
+from scipy.stats import mannwhitneyu
 
 
 def relative_frequency(cc_df):
@@ -25,6 +27,9 @@ def relative_frequency(cc_df):
     # add response column for boxplots
     sample_df['response'] = [r for r in list(cc_df.loc[:, 'response']) for _ in range(5)]
     
+    # add treatment column for boxplots
+    sample_df['treatment'] = [t for t in list(cc_df.loc[:, 'treatment']) for _ in range(5)]
+    
     # add populution column to output df
     sample_df['population'] = [pop for _ in range(len(cc_df['sample'])) for pop in populations]
     
@@ -42,16 +47,60 @@ def relative_frequency(cc_df):
     return cc_df, sample_df
     
     
-def make_box_plots(cc_df, sample_df):
+def make_box_plots(sample_df):
+    """
+    Function will receive sample_df and create boxplots comparing the relative frequencies between responders and
+    non-responders of tr1 for each population.
+    :param sample_df: sample_df containing sample, population, treatment, response, and relative frequency information for all treatments.
+    :return: sample_df containing sample, population, treatment, response, and relative frequency information for tr1.
+    """
+    
     populations = ['b_cell', 'cd8_t_cell', 'cd4_t_cell', 'nk_cell', 'monocyte']
     
-    # for each population, we want to make two boxplots, one for responders and one for non-responders.
-    # We won't include any data with samples that have nan for the response
-    plt.boxplot([1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 3, 4, 5, 2, 3])
-    plt.show()
+    # set up a subplot grid for the boxplots
+    fig, axes = plt.subplots(2, 3, figsize=(12, 8))
+    axes = axes.flatten()
+    plt.subplots_adjust(wspace=0.5, bottom=0.2, hspace=0.5)
+    title = fill("Population Relative Frequencies Comparing Responders vs. Non-Responders", width=50)
+    fig.suptitle(title, fontsize=14)
     
-    print()
-
+    # for each population, we want to make two boxplots, one for responders and one for non-responders.
+    # We won't include any data with samples that have nan for the response or didn't receive treatment 1
+    
+    sample_df = sample_df[sample_df.loc[:, 'treatment'] == 'tr1']
+    
+    response_freqs = []
+    no_response_freqs = []
+    with open("significance_tests.txt", 'w') as outf:
+        for p in populations:
+            # responders boxplot
+            response = sample_df[(sample_df.loc[:, "population"] == p) & (sample_df.loc[:, "response"] == "y")]
+            response_freqs.append(list(response.loc[:, 'percentage']))
+            
+            # non-responders boxplot
+            no_response = sample_df[(sample_df.loc[:, "population"] == p) & (sample_df.loc[:, "response"] == "n")]
+            no_response_freqs.append(list(no_response.loc[:, 'percentage']))
+            
+            # use Mann-Whiteny U test to calculate a p-value
+            stat, p_value = mannwhitneyu(response.loc[:, 'percentage'], no_response.loc[:, 'percentage'])
+            outf.write(f"Population: {p}\n")
+            outf.write(f"Mann-Whitney U Test Score: {stat}\n")
+            outf.write(f"P-value: {round(p_value, 5)}\n\n")
+        
+    # graph, format, and shos boxplots
+    titles = ["Responders", "Non-Responders"]
+    for i in range(len(populations)):
+        axes[i].boxplot([response_freqs[i], no_response_freqs[i]], medianprops={"color": 'red', 'linewidth': 1})
+        axes[i].set_ylabel("Relative Frequency %")
+        axes[i].set_title(populations[i])
+        axes[i].set_xticklabels(titles, ha='center')
+        
+    # remove blank plot and save figure
+    axes[-1].axis('off')
+    plt.savefig("Relative_Frequency_Comparisons.png")
+    
+    return sample_df
+    
 
 def main():
     """
@@ -81,8 +130,10 @@ def main():
     # call function to create relative freqeuncy .csv output
     cc_df, sample_df = relative_frequency(cc_df)
     
-    # make boxplots showing the population relative frequencies comparing responders vs. non-responders
-    make_box_plots(cc_df, sample_df)
+    # Make boxplots showing the population relative frequencies comparing responders vs. non-responders.
+    # Run some statistics to see hich cell populations are significantly different in relative frequencies
+    # between responders and non-responders.
+    sample_df = make_box_plots(sample_df)
 
 
 if __name__ == "__main__":
